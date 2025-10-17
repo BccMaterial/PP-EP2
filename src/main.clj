@@ -41,6 +41,8 @@
     )
 )
 
+
+; ------- USO DA FUNÇÃO -------
 (println 
     (with_columns ["id", "nome", "idade", "email"]
         (table
