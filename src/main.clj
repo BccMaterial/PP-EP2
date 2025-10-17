@@ -10,10 +10,21 @@
     (str " WHERE " (reduce build_where "" filter_list))
 )
 
-(defn table [tabela] (str "SELECT * FROM ", tabela))
-(print (table "usuarios"))
+(defn table 
+    ([col_name] (str "SELECT * FROM ", col_name))
+    ([col_name filters] (str "SELECT * FROM ", col_name, filters))
+)
 
-(print 
-    (filters [{:field "id", :value 1}]
+(println (table "usuarios"))
+
+(println 
+    (table
+        "usuarios"
+        (filters 
+            [
+                { :field "id", :value 1 },
+                { :field "idade", :value 25 }
+            ]
+        )
     )
 )
