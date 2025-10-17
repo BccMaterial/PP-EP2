@@ -1,20 +1,30 @@
-; Pode virar uma partial
-(defn build_where [acc item]
-    ; Se é o primeiro, não tem AND
+; ------- WHERE BUILDER -------
+
+(defn build_where [operator acc item]
+    ; Se é o primeiro, não tem "operator"
     (if (empty? acc)
         (str (:field item) " = " (:value item))
-        (str acc " AND " (:field item) " = " (:value item))
+        (str acc " " operator " " (:field item) " = " (:value item))
     )
 )
 
+(def build_ands (partial build_where "AND"))
+(def build_ors (partial build_where "OR"))
+
 (defn ands 
-    ([filter_list] (reduce build_where "" filter_list))
+    ([filter_list] (reduce build_ands "" filter_list))
+)
+
+(defn ors
+    ([filter_list] (reduce build_ors "" filter_list))
 )
 
 ; Aqui vai ter q passar uma função (pra ser usada no lugar do build_where)
 (defn filters [filters_list]
     (str " WHERE " filters_list)
 )
+
+; ------- FUNÇÃO PRINCIPAL -------
 
 (defn table 
     ([table_name] (str "SELECT * FROM ", table_name))
