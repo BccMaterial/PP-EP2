@@ -1,3 +1,5 @@
+(require '[clojure.string :as str])
+
 ; ------- WHERE BUILDER -------
 
 (defn build_where [operator acc item]
@@ -24,21 +26,31 @@
     (str " WHERE " filters_list)
 )
 
-; ------- FUNÇÃO PRINCIPAL -------
+; ------- FUNÇÕES PRINCIPAIS -------
 
 (defn table 
     ([table_name] (str "SELECT * FROM ", table_name))
     ([table_name filters] (str "SELECT * FROM ", table_name, filters))
 )
 
+(defn with_columns [columns query]
+    (str/replace query "*" 
+        (reduce (fn [acc value] 
+                    (str acc ", " value)
+                ) columns)
+    )
+)
+
 (println 
-    (table
-        "usuarios"
-        (filters 
-            (ands [
-                { :field "id", :value 1 },
-                { :field "idade", :value 25 }
-            ])
+    (with_columns ["id", "nome", "idade", "email"]
+        (table
+            "usuarios"
+            (filters 
+                (ands [
+                    { :field "id", :value 1 },
+                    { :field "idade", :value 25 }
+                ])
+            )
         )
     )
 )
