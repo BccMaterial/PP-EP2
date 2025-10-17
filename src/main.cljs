@@ -1,3 +1,3 @@
-(defn busca_tabela [tabela] (str "SELECT * FROM ", tabela))
+(defn table [tabela] (str "SELECT * FROM ", tabela))
 
-(print (busca_tabela "usuarios"))
+(print (table "usuarios"))
