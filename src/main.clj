@@ -3,7 +3,7 @@
 (def ops {
     :maior ">"
     :menor "<"
-    :menor_igual ">="
+    :menor_igual "<="
     :maior_igual ">="
     :igual "="
     :in "IN"
