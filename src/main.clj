@@ -54,38 +54,39 @@
 ; ------- WHERE BUILDER -------
 
 (defn handle_where_set [operator acc item]
+    (println item)
     (if (empty? acc)
         (str (:field item) " " (handle_condition item) " " (handle_value item))
         (str acc " " operator " " (:field item) " " (handle_condition item) " " (handle_value item))
     )   
 )
 
-(defn handle_where_string [operator acc item] 
-    (str acc " " item)
+(defn handle_where_set_with_operator [acc item] 
+    (str acc " " (:operator item) " " (:query item))
 )
 
 (defn build_where [operator acc item]
     ; Se é o primeiro, não tem "operator"
-    (cond
-        (string? item) (handle_where_string operator acc item)
-        :else (handle_where_set operator acc item)
+    (if (contains? item :operator)
+        (handle_where_set_with_operator acc item)
+        (handle_where_set operator acc item)
     )
 )
 
 (def build_ands (partial build_where "AND"))
 (def build_ors (partial build_where "OR"))
 
-(defn ands 
-    ([filter_list] (reduce build_ands "" filter_list))
+(defn ands [filter_list] 
+    { :operator "AND" :query (reduce build_ands "" filter_list) }
 )
 
-(defn ors
-    ([filter_list] (reduce build_ors "" filter_list))
+(defn ors [filter_list] 
+    { :operator "OR" :query (reduce build_ors "" filter_list) }
 )
 
 ; Aqui vai ter q passar uma função (pra ser usada no lugar do build_where)
 (defn filters [filters_query]
-    (str " WHERE " filters_query)
+    (str " WHERE " (:query filters_query))
 )
 
 ; ------- FUNÇÕES PRINCIPAIS -------
