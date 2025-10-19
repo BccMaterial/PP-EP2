@@ -12,6 +12,16 @@
 
 ; ------- KV HANDLERS -------
 
+(defn format_by_type [item]
+  (cond
+    (string? item) (str "\"" item "\"")
+    (keyword? item) (str ":" item)
+    (number? item) (str item)
+    (boolean? item) (if item "true" "false")
+    (vector? item) (str "[" (str/join ", " (map format_by_type item)) "]")
+    (list? item) (str "(" (str/join ", " (map format_by_type item)) ")")
+    :else (str item)))
+
 (defn retrieve_non_kv [[k _]]
     (not= k :field)
 )
@@ -25,18 +35,8 @@
     )) ops)
 )
 
-(defn handle_type [item]
-  (cond
-    (string? item) (str "\"" item "\"")
-    (keyword? item) (str ":" item)
-    (number? item) (str item)
-    (boolean? item) (if item "true" "false")
-    (vector? item) (str "[" (str/join ", " (map handle_type item)) "]")
-    (list? item) (str "(" (str/join ", " (map handle_type item)) ")")
-    :else (str item)))
-
 (defn handle_value [item]
-    (handle_type (first (rest (first 
+    (format_by_type (first (rest (first 
         (filter 
             retrieve_non_kv 
             (seq item)
