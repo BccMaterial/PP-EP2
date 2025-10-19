@@ -54,20 +54,20 @@
 ; ------- WHERE BUILDER -------
 
 (defn handle_where_set [operator acc item]
+    ; Se é o primeiro, não tem "operator"
     (if (empty? acc)
         (str (:field item) " " (handle_condition item) " " (handle_value item))
         (str acc " " operator " " (:field item) " " (handle_condition item) " " (handle_value item))
     )   
 )
 
-(defn handle_where_string [operator acc item] 
+(defn handle_where_string [acc item] 
     (str acc " " item)
 )
 
 (defn build_where [operator acc item]
-    ; Se é o primeiro, não tem "operator"
     (cond
-        (string? item) (handle_where_string operator acc item)
+        (string? item) (handle_where_string acc item)
         :else (handle_where_set operator acc item)
     )
 )
@@ -76,16 +76,29 @@
 (def build_ors (partial build_where "OR"))
 
 (defn ands 
-    ([filter_list] (reduce build_ands "" filter_list))
+    ([filter_list] (reduce build_ands "_" filter_list))
 )
 
 (defn ors
-    ([filter_list] (reduce build_ors "" filter_list))
+    ([filter_list] (reduce build_ors "_" filter_list))
 )
 
 ; Aqui vai ter q passar uma função (pra ser usada no lugar do build_where)
 (defn filters [filters_query]
-    (str " WHERE " filters_query)
+    (str/replace
+        (str/replace
+            (str/replace
+                (str/replace
+                    (str " WHERE " filters_query)
+                    "WHERE _ AND"
+                    "WHERE")
+                "WHERE _ OR"
+                "WHERE")
+            "_ AND"
+            "AND")
+        "_ OR"
+        "OR"
+    )
 )
 
 ; ------- FUNÇÕES PRINCIPAIS -------
@@ -113,8 +126,8 @@
             (filters 
                 (ands [
                     { :field "id", :notin [1, 2, 3, 4] },
-                    { :field "idade", :maior 25 }
-                    { :field "nome", :in ["eduarda", "josias", "vinicius", "thiago"] }
+                    { :field "idade", :maior 25 },
+                    { :field "nome", :in ["eduarda", "josias", "vinicius", "thiago"] },
                     (ors [
                         { :field "email" :igual "thiagopls1@homail.com" }
                     ])
