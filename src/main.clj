@@ -1,12 +1,45 @@
 (require '[clojure.string :as str])
 
+(def ops {
+    :maior ">"
+    :menor "<"
+    :menor_igual ">"
+    :igual "="
+    :in "IN"
+    :diff "<>"
+})
+
+; ------- KV HANDLERS -------
+
+(defn retrieve_non_kv [[k _]]
+    (not= k :field)
+)
+
+(defn handle_item [item]
+    ((first (first 
+        (filter 
+            retrieve_non_kv 
+            (seq item)
+        )
+    )) ops)
+)
+
+(defn handle_value [item]
+    (first (rest (first 
+        (filter 
+            retrieve_non_kv 
+            (seq item)
+        )
+    )))
+)
+
 ; ------- WHERE BUILDER -------
 
 (defn build_where [operator acc item]
     ; Se é o primeiro, não tem "operator"
     (if (empty? acc)
-        (str (:field item) " = " (:value item))
-        (str acc " " operator " " (:field item) " = " (:value item))
+        (str (:field item) " " (handle_item item) " " (handle_value item))
+        (str acc " " operator " " (:field item) " " (handle_item item) " " (handle_value item))
     )
 )
 
@@ -43,14 +76,15 @@
 
 
 ; ------- USO DA FUNÇÃO -------
+
 (println 
     (with_columns ["id", "nome", "idade", "email"]
         (table
             "usuarios"
             (filters 
                 (ands [
-                    { :field "id", :value 1 },
-                    { :field "idade", :value 25 }
+                    { :field "id", :diff 1 },
+                    { :field "idade", :maior 25 }
                 ])
             )
         )
