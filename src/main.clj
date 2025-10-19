@@ -6,6 +6,7 @@
     :menor_igual ">"
     :igual "="
     :in "IN"
+    :notin "!IN"
     :diff "<>"
 })
 
@@ -24,13 +25,23 @@
     )) ops)
 )
 
+(defn handle_type [item]
+  (cond
+    (string? item) (str "\"" item "\"")
+    (keyword? item) (str ":" item)
+    (number? item) (str item)
+    (boolean? item) (if item "true" "false")
+    (vector? item) (str "[" (str/join ", " (map handle_type item)) "]")
+    (list? item) (str "(" (str/join ", " (map handle_type item)) ")")
+    :else (str item)))
+
 (defn handle_value [item]
-    (first (rest (first 
+    (handle_type (first (rest (first 
         (filter 
             retrieve_non_kv 
             (seq item)
         )
-    )))
+    ))))
 )
 
 ; ------- WHERE BUILDER -------
@@ -83,8 +94,9 @@
             "usuarios"
             (filters 
                 (ands [
-                    { :field "id", :diff 1 },
+                    { :field "id", :notin [1, 2, 3, 4] },
                     { :field "idade", :maior 25 }
+                    { :field "nome", :diff "eduarda" }
                 ])
             )
         )
